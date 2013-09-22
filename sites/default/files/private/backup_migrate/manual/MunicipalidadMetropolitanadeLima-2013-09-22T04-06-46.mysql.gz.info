@@ -1,0 +1,8 @@
+filename = "MunicipalidadMetropolitanadeLima-2013-09-22T04-06-46"
+description = ""
+datestamp = "1379840808"
+generator = "Backup and Migrate (http://drupal.org/project/backup_migrate)"
+generatorversion = "7.x-2.x"
+sites[0][version] = "7.22"
+sites[0][name] = "Municipalidad Metropolitana de Lima"
+sites[0][url] = "http://172.22.21.101/chatarreo/"

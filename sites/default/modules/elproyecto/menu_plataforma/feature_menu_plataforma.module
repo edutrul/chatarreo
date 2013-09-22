@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the feature_menu_plataforma feature.
+ */
+
+include_once 'feature_menu_plataforma.features.inc';

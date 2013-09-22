@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the feature_taxonomia_plataforma feature.
+ */
+
+include_once 'feature_taxonomia_plataforma.features.inc';

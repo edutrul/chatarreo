@@ -1,0 +1,21 @@
+name = Views Bootstrap
+core = 7.x
+package = Views
+description = Bootstrap Components
+
+dependencies[] = views
+
+files[] = plugins/carousel/views_bootstrap_carousel_plugin_style.inc
+files[] = plugins/carousel/views_bootstrap_carousel_plugin_rows.inc
+
+files[] = plugins/thumbnail/views_bootstrap_thumbnail_plugin_style.inc
+
+;@TODO: Add Collapse (accordion)
+;@TODO: Add Tabbable in any direction (?)
+
+; Information added by drupal.org packaging script on 2013-03-02
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "views_bootstrap"
+datestamp = "1362188943"
+

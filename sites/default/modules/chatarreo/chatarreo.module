@@ -1,0 +1,164 @@
+<?php
+/**
+ * @file
+ * TODO description goes here.
+ */
+
+define('MICROBUS', 'MICROBUS');
+define('CAMIONETA_RURAL', 'CAMIONETA RURAL');
+define('OMNIBUS', 'OMNIBUS');
+define('PLACA', 'placa');
+define('DNI', 'dni');
+define('RUC', 'ruc');
+
+
+/**
+ * Implements hook_menu().
+ */
+function chatarreo_menu() {
+  $items['buscador'] = array(
+    'title' => 'Felicitaciones',
+    'description' => 'Puedes formar parte del plan chatarreo.',
+    'page callback' => 'chatarreo_plan_search',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * 
+ */
+function chatarreo_plan_search() {
+  if (isset($_GET['id_busqueda']) && is_numeric($_GET['id_busqueda'])) {
+    $id_busqueda = $_GET['id_busqueda'];
+  }
+  else {
+    drupal_not_found();
+  }
+  //~ error_reporting(E_ALL);
+  //~ ini_set('display_errors', '1');
+  $output = "";
+  
+  // Select table
+  $query = db_select("node", "n")
+    ->fields("n", array("nid"))
+    ->condition("type", "vehiculos");
+  $result = $query->execute();
+  
+
+  // Prepare table header.
+  $header = array('<b>PLACA</b>', '<b>AÑO FAB</b>', '<b>NUM. ASIENTO</b>', '<b>MODALIDAD SERVICIO</b>', '<b>CLASE VEHICULO</b>', '<b>MODELO</b>', '<b>BONIFICACION</b>');
+  
+
+  $rows = array();
+  
+  $suma = 0;
+  
+  // Looping for filling the table rows
+  while ($data = $result->fetchAssoc()) {
+    $node = node_load($data['nid']);
+    
+    if ($id_busqueda == $node->title || $node->field_documento['und'][0]['value'] == $id_busqueda) {
+      $bonificacion = _get_vehiculo_plan_chatarreo($node->field_nombre_clase_vehiculo['und'][0]['value'], $node->field_anio_fabricacion['und'][0]['value'], $node->field_numero_asiento['und'][0]['value']);
+      
+      if ($bonificacion) {
+        $propietario = $node->field_propietario['und'][0]['value'];
+        // Fill the table rows
+        $rows[] = array(
+          $node->title,
+          $node->field_anio_fabricacion['und'][0]['value'],
+          $node->field_numero_asiento['und'][0]['value'],
+          $node->field_nombre_modalidad_servicio['und'][0]['value'],
+          $node->field_nombre_clase_vehiculo['und'][0]['value'],
+          $node->field_nombre_modelo['und'][0]['value'],
+          '<b style="color:green">' . $bonificacion . '</b>',
+        );
+        $suma += $bonificacion;
+      }
+    }
+  }
+  
+  $msg_puntos_total = '<h2 style="color:orange">TOTAL BONIFICACIÓN a recibir: $ ' . $suma . '</h2>';
+  
+  $msg_propietario = '<h2> En hora buena: ' . $propietario . '</h2>' . ' tu(s) carro(s) acreditan para que puedas obtener un incentivo ECÓNOMICO. <br><br>';
+  
+  // Output of table with the paging
+  $output = theme_table(
+    array(
+      "header" => $header,
+      "rows" => $rows,
+      "attributes" => array(),
+      "sticky" => true, // Table header will be sticky
+      "caption" => "",
+      "colgroups" => array(),
+      "empty" => t("Table has no row!"), // The message to be displayed if table is empty
+      "attributes" => array("class" => array("table-condensed")), // The message to be displayed if table is empty
+    )
+  );
+  
+  $msg_enlace_pdf = '<b>OBTEN TU BONO </b><a href="http://www.protransporte.gob.pe/programa_de_chatarreo.pdf" target="_blank">SIGUIENDO LOS OTROS PASOS AQUI</a>';
+  
+  $msg_encontacto = '<br> Nos pondremos en contacto contigo cuanto antes! Para eso Ingresa los siguientes datos:';
+  
+  $block = module_invoke('webform', 'block_view', 'webform-client-form-230');
+  $block_render = render($block['content']);
+  
+  return $msg_propietario  . $output . '<br><br>' . $msg_puntos_total . $msg_enlace_pdf . $msg_encontacto . $block_render;
+}
+
+/**
+ * Get bonificación of a vehiculo.
+ * 
+ * @param $tipo string
+ *   The tipo vehiculo.
+ * @param $anio int
+ *   The year of the vehiculo.
+ * @param $num_asientos
+ *   The num of asientos of the vehiculo.
+ * 
+ * @return int|boolean
+ *   The integer number of the bonificacion, else return FALSE.
+ */
+function _get_vehiculo_plan_chatarreo($tipo, $anio, $num_asientos) {
+  $current_year = date('Y');
+  if (CAMIONETA_RURAL == $tipo) {
+    if ($num_asientos >= 10 && $num_asientos <= 16) {
+      if ($current_year - 20 >= $anio && $anio >= $current_year - 24) {
+        //~ return CAMIONETA_RURAL . '    US $5000' . '<br>';
+        return 5000;
+      }
+      elseif ($current_year - 25 >= $anio) {
+        //~ return CAMIONETA_RURAL . '    US $4000'. '<br>';
+        return 4000;
+      }
+    }
+  }
+
+  elseif (MICROBUS == $tipo) {
+    if ($num_asientos >= 17 && $num_asientos <= 33) {
+      if ($current_year - 20 >= $anio && $anio >= $current_year - 24) {
+        //~ return MICROBUS . '    US $7500'. '<br>';
+        return 7500;
+      }
+      elseif ($current_year - 25 >= $anio) {
+        return 6000;
+      }
+    }
+  }
+  
+  elseif (OMNIBUS == $tipo) {
+    if ($num_asientos >= 34) {
+      if ($current_year - 20 >= $anio && $anio >= $current_year - 24) {
+        return 10000;
+      }
+      elseif ($current_year - 25 >= $anio) {
+        return 8000;
+      }
+    }
+  }
+  else {
+    return FALSE;
+  }
+}
+ 

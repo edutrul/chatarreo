@@ -1,0 +1,15 @@
+/* 
+Escribir aquí los estilos que se rompen con la optimización.
+La optimización de drupal arruina estilos como 'behavior', los prefijos  -moz-webkit, etc.
+Eso genera errores en explorer 7.
+
+#ejemplo{
+-moz-box-shadow:0 0 5px #000; -webkit-box-shadow:0 0 5px #000; -o-box-shadow:0 0 5px #000; 
+-ms-box-shadow:0 0 5px #000; box-shadow:0 0 5px #000;
+behavior:url(sites/default/themes/barrio/js/libraries/PIE-1.0.0/PIE.htc); position:relative}
+
+#ejemplo{-moz-border-radius:0 0 50px 50px; -webkit-border-radius:0 0 50px 50px; -o-border-radius:0 0 50px 50px; 
+-ms-border-radius:0 0 50px 50px; border-radius:0 0 50px 50px;
+behavior:url(sites/default/themes/barrio/js/libraries/PIE-1.0.0/PIE.htc); position:relative}
+*/
+

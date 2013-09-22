@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the feature_contenido_portafolio feature.
+ */
+
+include_once 'feature_contenido_portafolio.features.inc';

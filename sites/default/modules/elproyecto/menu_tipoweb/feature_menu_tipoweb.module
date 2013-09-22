@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the feature_menu_tipoweb feature.
+ */
+
+include_once 'feature_menu_tipoweb.features.inc';

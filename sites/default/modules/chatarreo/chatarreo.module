@@ -52,9 +52,9 @@ function chatarreo_plan_search() {
   
 
   $rows = array();
-  
+  $arr_sanciones = array();
   $suma = 0;
-  
+  $count = 0;
   // Looping for filling the table rows
   while ($data = $result->fetchAssoc()) {
     $node = node_load($data['nid']);
@@ -64,19 +64,34 @@ function chatarreo_plan_search() {
       
       if ($bonificacion) {
         $propietario = $node->field_propietario['und'][0]['value'];
+        $_SESSION['propietario'] = $propietario;
+        $ini_error_tags = '';
+        $close_tag = '';
+        $sanciones = 0;
+        if (isset($node->field_sancion['und'][0]['value']) && $node->field_sancion['und'][0]['value'] > 0) {
+          $ini_error_tags = '<div class="error underline-message">';
+          $close_tag = '</div>';
+          $sanciones = $node->field_sancion['und'][0]['value'];
+        }
         // Fill the table rows
         $rows[] = array(
-          $node->title,
-          $node->field_anio_fabricacion['und'][0]['value'],
-          $node->field_numero_asiento['und'][0]['value'],
-          $node->field_nombre_modalidad_servicio['und'][0]['value'],
-          $node->field_nombre_clase_vehiculo['und'][0]['value'],
-          $node->field_nombre_modelo['und'][0]['value'],
-          '<b style="color:green">' . $bonificacion . '</b>',
+          $ini_error_tags . $node->title . $close_tag,
+          $ini_error_tags . $node->field_anio_fabricacion['und'][0]['value'] . $close_tag,
+          $ini_error_tags . $node->field_numero_asiento['und'][0]['value'] . $close_tag,
+          $ini_error_tags . $node->field_nombre_modalidad_servicio['und'][0]['value'] . $close_tag,
+          $ini_error_tags . $node->field_nombre_clase_vehiculo['und'][0]['value']. $close_tag,
+          $ini_error_tags . $node->field_nombre_modelo['und'][0]['value'] . $close_tag,
+          $ini_error_tags . '<b style="color:green">' . $bonificacion . '</b>' . $close_tag,
         );
-        $suma += $bonificacion;
+        if ($sanciones == 0) {
+          $suma += $bonificacion;
+        }
+        elseif ($sanciones > 0) {
+          $arr_sanciones[] = array('placa' => $node->title, 'cant_sanciones' => $sanciones);
+        }
       }
     }
+    $count++;
   }
   
   $msg_puntos_total = '<h2 style="color:orange">TOTAL BONIFICACIÓN a recibir: $ ' . $suma . '</h2>';
@@ -97,6 +112,11 @@ function chatarreo_plan_search() {
     )
   );
   
+  $error_sancion_message = '';
+  if (isset($arr_sanciones[0])) {
+    $error_sancion_message = _render_sanciones_table($arr_sanciones);
+  }
+  
   $msg_enlace_pdf = '<b>OBTEN TU BONO </b><a href="http://www.protransporte.gob.pe/programa_de_chatarreo.pdf" target="_blank">SIGUIENDO LOS OTROS PASOS AQUI</a>';
   
   $msg_encontacto = '<br> Nos pondremos en contacto contigo cuanto antes! Para eso Ingresa los siguientes datos:';
@@ -104,7 +124,8 @@ function chatarreo_plan_search() {
   $block = module_invoke('webform', 'block_view', 'webform-client-form-230');
   $block_render = render($block['content']);
   
-  return $msg_propietario  . $output . '<br><br>' . $msg_puntos_total . $msg_enlace_pdf . $msg_encontacto . $block_render;
+  
+  return $msg_propietario  . $output . '<br><br>' . $msg_puntos_total . $msg_enlace_pdf . $error_sancion_message . $msg_encontacto . $block_render;
 }
 
 /**
@@ -161,4 +182,45 @@ function _get_vehiculo_plan_chatarreo($tipo, $anio, $num_asientos) {
     return FALSE;
   }
 }
- 
+
+/**
+ * Theme sanciones table.
+ */
+function _render_sanciones_table($sanciones) {
+  
+  // Prepare table header.
+  $header = array('<b>PLACA</b>', '<b>SANCIONES</b>');
+  $rows = array();
+  foreach ($sanciones as $sancion) {
+    $rows[] = array(
+      '<div class="error underline-message">' . $sancion['placa'] . '</div>',
+      '<div class="error underline-message">' . $sancion['cant_sanciones'] . '</div>',
+    );
+  }
+  
+  // Output of table with the paging
+  $tabla_sanciones = theme_table(
+    array(
+      "header" => $header,
+      "rows" => $rows,
+      "sticky" => FALSE, // Table header will be sticky
+      "caption" => "",
+      "colgroups" => array(),
+      "empty" => t("Table has no row!"), // The message to be displayed if table is empty
+      "attributes" => array("class" => array("table-condensed")), // The message to be displayed if table is empty
+    )
+  );
+  
+  return $tabla_sanciones;
+}
+
+/**
+ * hook_form_alter().
+ */
+function chatarreo_form_alter(&$form, &$form_state, $form_id) {
+
+  if ($form_id == 'webform_client_form_230') {
+    $form['submitted']['nombre']['#value'] = $_SESSION['propietario'];
+    $form['submitted']['nombre']['#disabled'] = TRUE;
+  }
+}

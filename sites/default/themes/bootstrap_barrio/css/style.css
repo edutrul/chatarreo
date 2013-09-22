@@ -467,3 +467,13 @@ th {
   font-weight: bolder;
   font-size: medium;
 }
+
+.underline-message {
+  text-decoration: line-through;
+}
+
+input[disabled="disabled"] {
+  background: orange;
+  color: white;
+  font-weight: bolder;
+}

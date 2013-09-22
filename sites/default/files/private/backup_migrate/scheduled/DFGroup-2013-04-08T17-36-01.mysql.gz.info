@@ -1,8 +1,0 @@
-filename = "DFGroup-2013-04-08T17-36-01"
-description = ""
-datestamp = "1365460565"
-generator = "Backup and Migrate (http://drupal.org/project/backup_migrate)"
-generatorversion = "7.x-2.x"
-sites[0][version] = "7.21"
-sites[0][name] = "DF Group"
-sites[0][url] = "http://df.drupal.com.pe/"
